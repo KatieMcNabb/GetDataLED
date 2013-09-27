@@ -7,10 +7,11 @@
 package org.sunspotworld;
 
 import com.sun.spot.io.j2me.radiogram.*;
-
+import javax.microedition.midlet.MIDletStateChangeException;
 import com.sun.spot.peripheral.ota.OTACommandServer;
 import com.sun.spot.util.Utils;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.Date;
@@ -29,11 +30,12 @@ public class SunSpotHostApplication {
         RadiogramConnection rCon;
         Datagram dg;
         DateFormat fmt = DateFormat.getTimeInstance();
+        
          
         try {
             // Open up a server-side broadcast radiogram connection
             // to listen for sensor readings being sent by different SPOTs
-            rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
+            rCon = (RadiogramConnection) Connector.open("radiogram://broadcast:" + HOST_PORT);
             dg = rCon.newDatagram(rCon.getMaximumLength());
         } catch (Exception e) {
              System.err.println("setUp caught " + e.getMessage());
@@ -43,15 +45,15 @@ public class SunSpotHostApplication {
         createTable();
         insertInitialDataTable();
         
-        // Main data collection loop
+        // Loop to query database and send info to spots
         while (true) {
             try {
-                // Read sensor sample received over the radio
-                rCon.receive(dg);
-                String addr = dg.getAddress();  // read sender's Id
-                long time = dg.readLong();      // read time of the reading
-                float val = dg.readFloat();         // read the sensor value
-                System.out.println(fmt.format(new Date(time)) + "  from: " + addr + "   value = " + val);
+                int data = queryTable(2);
+                System.out.println("value in table is " + data);
+                dg.writeInt(data);
+                rCon.send(dg);
+                Utils.sleep(100);
+                
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
                 throw e;
@@ -69,6 +71,7 @@ public class SunSpotHostApplication {
         OTACommandServer.start("SendDataDemo");
 
         SunSpotHostApplication app = new SunSpotHostApplication();
+        
         app.run();
     }
 
@@ -124,6 +127,7 @@ public class SunSpotHostApplication {
             /*Create sql statement*/
             insertStatement = insertConnection.createStatement();
             
+            try{
             String sql = "INSERT INTO OURDATA(ID,ONOFF)" + 
                     "VALUES('0014.4F01.0000.7FEE',0);";
             insertStatement.executeUpdate(sql);
@@ -135,13 +139,78 @@ public class SunSpotHostApplication {
             String sql3 = "INSERT INTO OURDATA(ID,ONOFF)" + 
             "VALUES('0014.4F01.0000.4120',0);";
             insertStatement.executeUpdate(sql3);
-            
+            }catch(Exception e)
+            {
+                System.err.println("Table already contains default data...continuing");
+            }
             insertStatement.close();
             insertConnection.close();
             
         }catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
+        }
+    }
+    
+    public static int queryTable(int spotNumber) {
+        java.sql.Connection queryConnection = null;
+        Statement queryStatement = null;
+
+        try {
+            /*Create connection with database*/
+            Class.forName("org.sqlite.JDBC");
+            queryConnection = DriverManager.getConnection("jdbc:sqlite:spotData.db");
+            System.out.println("Opened database successfully");
+
+            /*Create sql statement*/
+            queryStatement = queryConnection.createStatement();
+
+            if (spotNumber == 1) {
+                String sql = "SELECT ONOFF "
+                        + "FROM OURDATA "
+                        + "WHERE ID = '0014.4F01.0000.7FEE';";
+                ResultSet myResult = queryStatement.executeQuery(sql);
+                int data = myResult.getInt("ONOFF");
+                
+                myResult.close();
+                queryStatement.close();
+                queryConnection.close();
+
+                return data;
+                
+            } else if (spotNumber == 2) {
+                String sql = "SELECT ONOFF "
+                        + "FROM OURDATA "
+                        + "WHERE ID = '0014.4F01.0000.4120';";
+                
+                ResultSet myResult = queryStatement.executeQuery(sql);
+                int data = myResult.getInt("ONOFF");
+                
+                myResult.close();
+                queryStatement.close();
+                queryConnection.close();
+
+                return data;
+                
+
+            } else {
+                String sql = "SELECT ONOFF "
+                        + "FROM OURDATA "
+                        + "WHERE ID = '0014.4F01.0000.4120';";
+
+                ResultSet myResult = queryStatement.executeQuery(sql);
+                int data = myResult.getInt("ONOFF");
+                
+                myResult.close();
+                queryStatement.close();
+                queryConnection.close();
+
+                return data;
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+            return 0;
         }
     }
 }
