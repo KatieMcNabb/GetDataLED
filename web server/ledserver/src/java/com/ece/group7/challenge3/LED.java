@@ -10,13 +10,14 @@ public class LED {
 	    try {
 	      Class.forName("org.sqlite.JDBC");
 	      //need to change the database file directory//
-	      c = DriverManager.getConnection("jdbc:sqlite:file:/Users/XXXX.db");
+	      c = DriverManager.getConnection(
+                      "jdbc:sqlite:file:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 
 	      stmt = c.createStatement();
 	      //will use the remote which IP address is ended by 765E//
-	      String sql = "UPDATE OURDATA set ONOFF = '0' where ID='0014.4F01.0000.765E'";
+	      String sql = "UPDATE OURDATA set ONOFF = '0' where ID='0014.4F01.0000.7FEE'";
 	      stmt.executeUpdate(sql);
 	      c.commit();
 	      stmt.close();
@@ -34,13 +35,14 @@ public class LED {
 	    try {
 	      Class.forName("org.sqlite.JDBC");
 	      //need to change the database file directory//
-	      c = DriverManager.getConnection("jdbc:sqlite:file:/Users/XXXX.db");
+	      c = DriverManager.getConnection(
+                      "jdbc:sqlite:file:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
 	      c.setAutoCommit(false);
 	      System.out.println("Opened database successfully");
 
 	      stmt = c.createStatement();
 	      //will use the remote which IP address is ended by 765E//
-	      String sql = "UPDATE OURDATA set ONOFF = '1' where ID='0014.4F01.0000.765E'";
+	      String sql = "UPDATE OURDATA set ONOFF = '1' where ID='0014.4F01.0000.7FEE'";
 	      stmt.executeUpdate(sql);
 	      c.commit();
 	      stmt.close();

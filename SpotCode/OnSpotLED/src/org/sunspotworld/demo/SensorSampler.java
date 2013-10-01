@@ -46,7 +46,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class SensorSampler extends MIDlet {
 
-    private static final int HOST_PORT = 88;
+    private static final int HOST_PORT = 65;
     private static final int SAMPLE_PERIOD = 1 * 1000;  // in milliseconds
     int count = 0;
 
@@ -64,11 +64,10 @@ public class SensorSampler extends MIDlet {
 
 	// Listen for downloads/commands over USB connection
 	new com.sun.spot.service.BootloaderListenerService().getInstance().start();
-
         try {
             // Open up a broadcast connection to the host port
             // where the 'on Desktop' portion of this demo is listening
-            rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
+            rCon = (RadiogramConnection) Connector.open("radiogram://0014.4F01.0000.7FEE:" + HOST_PORT);
             dg = rCon.newDatagram(50);  // only sending 50 bytes of data
         } catch (Exception e) {
             System.err.println("Caught " + e + " in connection initialization.");
@@ -79,7 +78,7 @@ public class SensorSampler extends MIDlet {
             try {
                 // Get the current time and sensor reading
                 dg.reset();
-                rCon.receive(dg);
+               rCon.receive(dg);
                 count =dg.readInt();
                 //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+count);
                 long now = System.currentTimeMillis();
@@ -87,13 +86,20 @@ public class SensorSampler extends MIDlet {
 
                 // Flash an LED to indicate a sampling event
                if (count ==1){
-                leds.setRGB(0, 255, 255);
-                leds.setOn();
+                 //System.out.println("Turning On");
+                led.setRGB(0, 255, 255);
+                led.setOn();
                 Utils.sleep(200);
-                leds.setOff();
+               // leds.setOff();
                }
+               else  {
+                   led.setOff();
+                   Utils.sleep(200);
+                   
+               }
+               
                 // Go to sleep to conserve battery
-                Utils.sleep(SAMPLE_PERIOD - (System.currentTimeMillis() - now));
+               // Utils.sleep();
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");
             }
