@@ -200,7 +200,7 @@ public class SunSpotHostApplication {
             } else {
                 String sql = "SELECT ONOFF "
                         + "FROM OURDATA "
-                        + "WHERE ID = '0014.4F01.0000.4120';";
+                        + "WHERE ID = '0014.4F01.0000.765E';";
 
                 ResultSet myResult = queryStatement.executeQuery(sql);
                 int data = myResult.getInt("ONOFF");
