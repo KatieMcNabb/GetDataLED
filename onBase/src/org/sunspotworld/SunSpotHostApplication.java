@@ -27,7 +27,7 @@ import javax.microedition.io.*;
 public class SunSpotHostApplication {
 
     // Broadcast port on which we listen for sensor samples
-    private static final int HOST_PORT = 67;
+    private static final int HOST_PORT = 65;
         
     private void run() throws Exception {
         RadiogramConnection rCon;
@@ -89,7 +89,7 @@ public class SunSpotHostApplication {
             
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            createConnect = DriverManager.getConnection("jdbc:sqlite:spotData.db");
+            createConnect = DriverManager.getConnection("jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
             System.out.println("Opened database successfully");
 
             /*Create table sql statement*/
@@ -125,7 +125,7 @@ public class SunSpotHostApplication {
         {
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            insertConnection = DriverManager.getConnection("jdbc:sqlite:spotData.db");
+            insertConnection = DriverManager.getConnection("jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
             System.out.println("Opened database successfully");
             
             /*Create sql statement*/
@@ -163,7 +163,7 @@ public class SunSpotHostApplication {
         try {
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            queryConnection = DriverManager.getConnection("jdbc:sqlite:spotData.db");
+            queryConnection = DriverManager.getConnection("jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
             System.out.println("Opened database successfully");
 
             /*Create sql statement*/

@@ -44,7 +44,7 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class SensorSampler extends MIDlet {
 
-    private static final int HOST_PORT = 67;
+    private static final int HOST_PORT = 65;
     private static final int SAMPLE_PERIOD = 10 * 1000;  // in milliseconds
     
     protected void startApp() throws MIDletStateChangeException {
@@ -77,7 +77,7 @@ public class SensorSampler extends MIDlet {
 
                 if (data == 1)
                 {
-                led.setRGB(0, 0, 255);
+                led.setRGB(0, 255, 0);
                 led.setOn();
                 Utils.sleep(50);
                 led.setOff();
