@@ -21,27 +21,30 @@ import javax.microedition.io.*;
 /**
  * Host application
  */
+/**
+ * Host application
+ */
 public class SunSpotHostApplication {
 
     // Broadcast port on which we listen for sensor samples
-    private static final int HOST_PORT = 65;
+    private static final int HOST_PORT = 67;
         
     private void run() throws Exception {
         RadiogramConnection rCon;
         Datagram dg;
-        DateFormat fmt = DateFormat.getTimeInstance();
         
          
         try {
             // Open up a server-side broadcast radiogram connection
             // to listen for sensor readings being sent by different SPOTs
-            rCon = (RadiogramConnection) Connector.open("radiogram://0014.4F01.0000.7FEE:" + HOST_PORT);
-            dg = rCon.newDatagram(rCon.getMaximumLength());
+            rCon = (RadiogramConnection) Connector.open("radiogram://broadcast:" + HOST_PORT);
+            dg = rCon.newDatagram(50);
         } catch (Exception e) {
              System.err.println("setUp caught " + e.getMessage());
              throw e;
         }
 
+        //Create initial table and insert data into that table
         createTable();
         insertInitialDataTable();
         
@@ -53,7 +56,7 @@ public class SunSpotHostApplication {
                 dg.reset();
                 dg.writeInt(data);
                 rCon.send(dg);
-                Utils.sleep(3000);
+                Utils.sleep(100);
                 
             } catch (Exception e) {
                 System.err.println("Caught " + e +  " while reading sensor samples.");
@@ -86,8 +89,7 @@ public class SunSpotHostApplication {
             
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            createConnect = DriverManager.getConnection(
-                    "jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
+            createConnect = DriverManager.getConnection("jdbc:sqlite:spotData.db");
             System.out.println("Opened database successfully");
 
             /*Create table sql statement*/
@@ -123,8 +125,7 @@ public class SunSpotHostApplication {
         {
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            insertConnection = DriverManager.getConnection(
-                    "jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
+            insertConnection = DriverManager.getConnection("jdbc:sqlite:spotData.db");
             System.out.println("Opened database successfully");
             
             /*Create sql statement*/
@@ -162,8 +163,7 @@ public class SunSpotHostApplication {
         try {
             /*Create connection with database*/
             Class.forName("org.sqlite.JDBC");
-            queryConnection = DriverManager.getConnection(
-                    "jdbc:sqlite:/Users/calvinflegal/Developer/ec544/Challenge3/GetDataLED/spotData.db");
+            queryConnection = DriverManager.getConnection("jdbc:sqlite:spotData.db");
             System.out.println("Opened database successfully");
 
             /*Create sql statement*/

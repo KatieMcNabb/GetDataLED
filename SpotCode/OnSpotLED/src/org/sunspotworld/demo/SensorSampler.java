@@ -27,9 +27,7 @@ package org.sunspotworld.demo;
 import com.sun.spot.io.j2me.radiogram.*;
 import com.sun.spot.resources.Resources;
 import com.sun.spot.resources.transducers.ITriColorLED;
-import com.sun.spot.resources.transducers.ITriColorLEDArray;
-
-//import com.sun.spot.resources.transducers.ITemperatureInput;
+import com.sun.spot.resources.transducers.ILightSensor;
 import com.sun.spot.util.Utils;
 import javax.microedition.io.*;
 import javax.microedition.midlet.MIDlet;
@@ -46,29 +44,26 @@ import javax.microedition.midlet.MIDletStateChangeException;
  */
 public class SensorSampler extends MIDlet {
 
-    private static final int HOST_PORT = 65;
-    private static final int SAMPLE_PERIOD = 1 * 1000;  // in milliseconds
-    int count = 0;
-
+    private static final int HOST_PORT = 67;
+    private static final int SAMPLE_PERIOD = 10 * 1000;  // in milliseconds
     
     protected void startApp() throws MIDletStateChangeException {
         RadiogramConnection rCon = null;
         Datagram dg = null;
         String ourAddress = System.getProperty("IEEE_ADDRESS");
-        //ITemperatureInput tempSensor = (ITemperatureInput) Resources.lookup(ITemperatureInput.class);
-        
-        ITriColorLEDArray leds =(ITriColorLEDArray) Resources.lookup(ITriColorLEDArray.class);
+        ILightSensor lightSensor = (ILightSensor)Resources.lookup(ILightSensor.class);
         ITriColorLED led = (ITriColorLED)Resources.lookup(ITriColorLED.class, "LED7");
         
         System.out.println("Starting sensor sampler application on " + ourAddress + " ...");
 
 	// Listen for downloads/commands over USB connection
 	new com.sun.spot.service.BootloaderListenerService().getInstance().start();
+
         try {
             // Open up a broadcast connection to the host port
             // where the 'on Desktop' portion of this demo is listening
-            rCon = (RadiogramConnection) Connector.open("radiogram://0014.4F01.0000.7FEE:" + HOST_PORT);
-            dg = rCon.newDatagram(50);  // only sending 50 bytes of data
+            rCon = (RadiogramConnection) Connector.open("radiogram://:" + HOST_PORT);
+            dg = rCon.newDatagram(rCon.getMaximumLength());  // only sending 12 bytes of data
         } catch (Exception e) {
             System.err.println("Caught " + e + " in connection initialization.");
             notifyDestroyed();
@@ -76,30 +71,26 @@ public class SensorSampler extends MIDlet {
         
         while (true) {
             try {
-                // Get the current time and sensor reading
-                dg.reset();
-               rCon.receive(dg);
-                count =dg.readInt();
-                //System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!"+count);
-                long now = System.currentTimeMillis();
+                
+                rCon.receive(dg);
+                int data = dg.readInt();
+
+                if (data == 1)
+                {
+                led.setRGB(0, 0, 255);
+                led.setOn();
+                Utils.sleep(50);
+                led.setOff();
+                }
+                else
+                {
+                led.setRGB(255, 0, 0);
+                led.setOn();
+                Utils.sleep(50);
+                led.setOff();
+                }
                 
 
-                // Flash an LED to indicate a sampling event
-               if (count ==1){
-                 //System.out.println("Turning On");
-                led.setRGB(0, 255, 255);
-                led.setOn();
-                Utils.sleep(200);
-               // leds.setOff();
-               }
-               else  {
-                   led.setOff();
-                   Utils.sleep(200);
-                   
-               }
-               
-                // Go to sleep to conserve battery
-               // Utils.sleep();
             } catch (Exception e) {
                 System.err.println("Caught " + e + " while collecting/sending sensor sample.");
             }
@@ -114,3 +105,4 @@ public class SensorSampler extends MIDlet {
         // Only called if startApp throws any exception other than MIDletStateChangeException
     }
 }
+ 
